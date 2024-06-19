@@ -4,7 +4,6 @@ import sys
 from impacket.dcerpc.v5 import samr, epm, transport
 from impacket.dcerpc.v5.rpcrt import RPC_C_AUTHN_GSS_NEGOTIATE
 
-
 class NXCModule:
     """
     Module by CyberCelt: @Cyb3rC3lt
@@ -42,6 +41,7 @@ class NXCModule:
 
         if "CHANGEPW" in module_options and ("NAME" not in module_options or "PASSWORD" not in module_options):
             context.log.error("NAME  and PASSWORD options are required!")
+            sys.exit(1)
         elif "CHANGEPW" in module_options:
             self.__noAdd = True
 
@@ -63,10 +63,9 @@ class NXCModule:
         self.__domain = connection.domain
         self.__domainNetbios = connection.domain
         self.__kdcHost = connection.kdcHost
-        self.__target = connection.host
         self.__username = connection.username
         self.__password = connection.password
-        self.__remoteHost = connection.remoteHost
+        self.__host = connection.host
         self.__port = context.smb_server_port
         self.__aesKey = context.aesKey
         self.__hashes = context.hash
@@ -88,8 +87,7 @@ class NXCModule:
         # If SAMR fails now try over LDAPS
         if not self.noLDAPRequired:
             self.do_ldaps_add(connection, context)
-        else:
-            sys.exit(1)
+            
 
     def do_samr_add(self, context):
         """
@@ -103,10 +101,10 @@ class NXCModule:
         -------
             None
         """
-        string_binding = epm.hept_map(self.__remoteHost, samr.MSRPC_UUID_SAMR, protocol="ncacn_np")
+        string_binding = epm.hept_map(self.__host, samr.MSRPC_UUID_SAMR, protocol="ncacn_np")
 
-        rpc_transport = transport.DCERPCTransportFactory(string_binding.replace(self.__remoteHost, self.__target))
-        rpc_transport.setRemoteHost(self.__remoteHost)
+        rpc_transport = transport.DCERPCTransportFactory(string_binding.replace(self.__host, self.__kdcHost))
+        rpc_transport.setRemoteHost(self.__host)
 
         if hasattr(rpc_transport, "set_credentials"):
             # This method exists only for selected protocol sequences.
@@ -121,7 +119,7 @@ class NXCModule:
         dce.connect()
         dce.bind(samr.MSRPC_UUID_SAMR)
 
-        samr_connect_response = samr.hSamrConnect5(dce, f"\\\\{self.__target}\x00", samr.SAM_SERVER_ENUMERATE_DOMAINS | samr.SAM_SERVER_LOOKUP_DOMAIN)
+        samr_connect_response = samr.hSamrConnect5(dce, f"\\\\{self.__kdcHost}\x00", samr.SAM_SERVER_ENUMERATE_DOMAINS | samr.SAM_SERVER_LOOKUP_DOMAIN)
         serv_handle = samr_connect_response["ServerHandle"]
 
         samr_enum_response = samr.hSamrEnumerateDomainsInSamServer(dce, serv_handle)
@@ -177,7 +175,6 @@ class NXCModule:
                     samr.hSamrLookupNamesInDomain(dce, domain_handle, [self.__computerName])
                     self.noLDAPRequired = True
                     context.log.highlight("{}".format('Computer account already exists with the name: "' + self.__computerName + '"'))
-                    sys.exit(1)
                 except samr.DCERPCSessionError as e:
                     if e.error_code != 0xC0000073:
                         raise

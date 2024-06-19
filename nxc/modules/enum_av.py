@@ -51,7 +51,7 @@ class NXCModule:
                 password=connection.password,
                 remote_name=target,
                 do_kerberos=connection.kerberos,
-                remoteHost=connection.remoteHost,
+                remoteHost=connection.host,
                 kdcHost=connection.kdcHost,
                 lmhash=connection.lmhash,
                 nthash=connection.nthash,
@@ -246,6 +246,14 @@ conf = {
             "name": "CrowdStrike",
             "services": [{"name": "CSFalconService", "description": "CrowdStrike Falcon Sensor Service"}],
             "pipes": [{"name": "CrowdStrike\\{*", "processes": ["CSFalconContainer.exe", "CSFalconService.exe"]}]
+        },
+        {
+            "name": "Cortex",
+            "services": [
+                {"name": "xdrhealth", "description": "Cortex XDR Health Helper"},
+                {"name": "cyserver", "description": " Cortex XDR"}
+            ],
+            "pipes": []
         },
         {
             "name": "Cybereason",

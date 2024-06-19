@@ -25,7 +25,6 @@ class SamrFunc:
         self.nthash = ""
         self.aesKey = connection.aesKey
         self.doKerberos = connection.kerberos
-        self.remoteHost = connection.remoteHost
         self.kdcHost = connection.kdcHost
 
         if self.hash is not None:
@@ -37,17 +36,8 @@ class SamrFunc:
         if self.password is None:
             self.password = ""
 
-        self.samr_query = SAMRQuery(
-            username=self.username,
-            password=self.password,
-            domain=self.domain,
-            remote_name=self.addr,
-            remote_host=self.remoteHost,
-            kerberos=self.doKerberos,
-            kdcHost=self.kdcHost,
-            aesKey=self.aesKey,
-        )
-        self.lsa_query = LSAQuery(username=self.username, password=self.password, domain=self.domain, remote_name=self.addr, remote_host=self.remoteHost, kdcHost=self.kdcHost, kerberos=self.doKerberos, aesKey=self.aesKey, logger=self.logger)
+        self.samr_query = SAMRQuery(username=self.username, password=self.password, domain=self.domain, remote_name=self.addr, remote_host=self.host, kerberos=self.doKerberos, kdcHost=self.kdcHost, aesKey=self.aesKey)
+        self.lsa_query = LSAQuery(username=self.username, password=self.password, domain=self.domain, remote_name=self.addr, remote_host=self.host, kdcHost=self.kdcHost, kerberos=self.doKerberos, aesKey=self.aesKey, logger=self.logger)
 
     def get_builtin_groups(self):
         domains = self.samr_query.get_domains()
@@ -58,7 +48,6 @@ class SamrFunc:
 
         domain_handle = self.samr_query.get_domain_handle("Builtin")
         return self.samr_query.get_domain_aliases(domain_handle)
-
 
     def get_custom_groups(self):
         domains = self.samr_query.get_domains()
@@ -175,7 +164,7 @@ class SAMRQuery:
 
     def get_domain_aliases(self, domain_handle):
         """Use a dictionary comprehension to generate the aliases dictionary.
-        
+
         Calls the hSamrEnumerateAliasesInDomain() method directly in the dictionary comprehension and extracts the "Name" and "RelativeId" values from each element in the "Buffer" list
         """
         return {alias["Name"]: alias["RelativeId"] for alias in samr.hSamrEnumerateAliasesInDomain(self.dce, domain_handle)["Buffer"]["Buffer"]}
@@ -245,7 +234,7 @@ class LSAQuery:
 
     def lookup_sids(self, sids):
         """Use a list comprehension to generate the names list.
-        
+
         It calls the hLsarLookupSids() method directly in the list comprehension and extracts the "Name" value from each element in the "Names" list.
         """
         return [translated_names["Name"] for translated_names in lsat.hLsarLookupSids(self.dce, self.policy_handle, sids, lsat.LSAP_LOOKUP_LEVEL.LsapLookupWksta)["TranslatedNames"]["Names"]]

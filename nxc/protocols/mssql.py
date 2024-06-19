@@ -2,6 +2,7 @@ import os
 import random
 import socket
 import contextlib
+from io import StringIO
 
 from nxc.config import process_secret
 from nxc.connection import connection
@@ -52,12 +53,10 @@ class mssql(connection):
         )
 
     def create_conn_obj(self):
-        if not self.remoteName:
-            self.remoteName = self.host
         try:
-            self.conn = tds.MSSQL(self.remoteHost, self.port, self.remoteName)
+            self.conn = tds.MSSQL(self.host, self.port, self.remoteName)
             # Default has not timeout option in tds.MSSQL.connect() function, let rewrite it.
-            af, socktype, proto, canonname, sa = socket.getaddrinfo(self.remoteHost, self.port, 0, socket.SOCK_STREAM)[0]
+            af, socktype, proto, canonname, sa = socket.getaddrinfo(self.host, self.port, 0, socket.SOCK_STREAM)[0]
             sock = socket.socket(af, socktype, proto)
             sock.settimeout(self.args.mssql_timeout)
             sock.connect(sa)
@@ -132,9 +131,6 @@ class mssql(connection):
             self.domain = self.args.domain
         if self.args.local_auth:
             self.domain = self.hostname
-
-        if self.domain is None:
-            self.domain = ""
 
         self.remoteName = self.host if not self.kerberos else f"{self.hostname}.{self.domain}"
 
@@ -305,42 +301,55 @@ class mssql(connection):
 
     @requires_admin
     def execute(self, payload=None, get_output=False):
-        if not payload and self.args.execute:
-            payload = self.args.execute
-
-        if not self.args.no_output:
-            get_output = True
-
-        self.logger.info(f"Command to execute: {payload}")
+        payload = self.args.execute if not payload and self.args.execute else payload
+        if not payload:
+            self.logger.error("No command to execute specified!")
+            return None
+        
+        get_output = True if not self.args.no_output else get_output
+        self.logger.debug(f"{get_output=}")
+        
         try:
             exec_method = MSSQLEXEC(self.conn, self.logger)
-            raw_output = exec_method.execute(payload, get_output)
+            output = exec_method.execute(payload)
+            self.logger.debug(f"Output: {output}")
         except Exception as e:
             self.logger.fail(f"Execute command failed, error: {e!s}")
             return False
         else:
-            self.logger.success("Executed command via mssqlexec")
-            if raw_output:
-                for line in raw_output:
-                    self.logger.highlight(line)
-            return raw_output
+            self.logger.success("Executed command via mssqlexec")   
+            if output:
+                output_lines = StringIO(output).readlines()
+                for line in output_lines:
+                    self.logger.highlight(line.strip())
+        return output
 
     @requires_admin
-    def ps_execute(
-        self,
-        payload=None,
-        get_output=False,
-        force_ps32=False,
-        dont_obfs=False,
-    ):
-        if not payload and self.args.ps_execute:
-            payload = self.args.ps_execute
-            if not self.args.no_output:
-                get_output = True
-
-        # We're disabling PS obfuscation by default as it breaks the MSSQLEXEC execution method
-        ps_command = create_ps_command(payload, force_ps32=force_ps32, dont_obfs=dont_obfs)
-        return self.execute(ps_command, get_output)
+    def ps_execute(self, payload=None, get_output=False, methods=None, force_ps32=False, obfs=False, encode=False):
+        payload = self.args.ps_execute if not payload and self.args.ps_execute else payload
+        if not payload:
+            self.logger.error("No command to execute specified!")
+            return None
+        
+        response = []
+        obfs = obfs if obfs else self.args.obfs
+        encode = encode if encode else not self.args.no_encode
+        force_ps32 = force_ps32 if force_ps32 else self.args.force_ps32
+        get_output = True if not self.args.no_output else get_output
+                
+        self.logger.debug(f"Starting PS execute: {payload=} {get_output=} {methods=} {force_ps32=} {obfs=} {encode=}")
+        amsi_bypass = self.args.amsi_bypass[0] if self.args.amsi_bypass else None
+        self.logger.debug(f"AMSI Bypass: {amsi_bypass}")
+        
+        if os.path.isfile(payload):
+            self.logger.debug(f"File payload set: {payload}")
+            with open(payload) as commands:
+                response = [self.execute(create_ps_command(c.strip(), force_ps32=force_ps32, obfs=obfs, custom_amsi=amsi_bypass, encode=encode), get_output) for c in commands]
+        else:
+            response = [self.execute(create_ps_command(payload, force_ps32=force_ps32, obfs=obfs, custom_amsi=amsi_bypass, encode=encode), get_output)]
+            
+        self.logger.debug(f"ps_execute response: {response}")
+        return response
 
     @requires_admin
     def put_file(self):
