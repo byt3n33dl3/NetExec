@@ -891,6 +891,28 @@ class smb(connection):
         for row in result:
             self.logger.highlight(row)
 
+    def tasklist(self):
+        with TSTS.LegacyAPI(self.conn, self.host) as legacy:
+            handle = legacy.hRpcWinStationOpenServer()
+            r = legacy.hRpcWinStationGetAllProcesses(handle)
+            if not len(r):
+                return None
+            self.logger.success("Enumerated processes")
+            maxImageNameLen = max([len(i['ImageName']) for i in r])
+            maxSidLen = max([len(i['pSid']) for i in r])
+            template = '{: <%d} {: <8} {: <11} {: <%d} {: >12}' % (maxImageNameLen, maxSidLen)
+            self.logger.highlight(template.format('Image Name', 'PID', 'Session#', 'SID', 'Mem Usage'))
+            self.logger.highlight(template.replace(': ',':=').format('','','','',''))
+            for procInfo in r:
+                row = template.format(
+                            procInfo['ImageName'],
+                            procInfo['UniqueProcessId'],
+                            procInfo['SessionId'],
+                            procInfo['pSid'],
+                            '{:,} K'.format(procInfo['WorkingSetSize']//1000),
+                        )
+                self.logger.highlight(row)
+                
     def shares(self):
         temp_dir = ntpath.normpath("\\" + gen_random_string())
         permissions = []
