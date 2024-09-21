@@ -30,7 +30,7 @@ def setup_debug_logging():
         root_logger.setLevel(logging.INFO)
     elif debug_args.debug:
         nxc_logger.logger.setLevel(logging.DEBUG)
-        root_logger.setLevel(logging.INFO)
+        root_logger.setLevel(logging.DEBUG)
     else:
         nxc_logger.logger.setLevel(logging.ERROR)
         root_logger.setLevel(logging.ERROR)
@@ -163,7 +163,7 @@ class NXCAdapter(logging.LoggerAdapter):
         If debug or info logging is not enabled, we still want display/success/fail logged to the file specified,
         so we create a custom LogRecord and pass it to all the additional handlers (which will be all the file handlers)
         """
-        if self.logger.getEffectiveLevel() >= logging.INFO and len(self.logger.handlers):  # will be 0 if it's just the console output, so only do this if we actually have file loggers
+        if len(self.logger.handlers):  # will be 0 if it's just the console output, so only do this if we actually have file loggers
             try:
                 for handler in self.logger.handlers:
                     handler.handle(LogRecord("nxc", 20, "", kwargs, msg=text, args=args, exc_info=None))
