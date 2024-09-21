@@ -48,7 +48,8 @@ def proto_args(parser, parents):
     mapping_enum_group.add_argument("--pass-pol", action="store_true", help="dump password policy")
     mapping_enum_group.add_argument("--rid-brute", nargs="?", type=int, const=4000, metavar="MAX_RID", help="enumerate users by bruteforcing RIDs")
     mapping_enum_group.add_argument("--qwinsta", action="store_true", help="Enumerate RDP connections")
-    
+    mapping_enum_group.add_argument("--tasklist", action="store_true", help="Enumerate running processes")
+
     wmi_group = smb_parser.add_argument_group("WMI", "Options for WMI Queries")
     wmi_group.add_argument("--wmi", metavar="QUERY", type=str, help="issues the specified WMI query")
     wmi_group.add_argument("--wmi-namespace", metavar="NAMESPACE", default="root\\cimv2", help="WMI Namespace")
