@@ -302,6 +302,10 @@ class smb(connection):
             self.kdcHost = result["host"] if result else None
             self.logger.info(f"Resolved domain: {self.domain} with dns, kdcHost: {self.kdcHost}")
 
+        # If we want to authenticate we should create another connection object, because we already logged in
+        if self.args.username or self.args.cred_id or self.kerberos:
+            self.create_conn_obj()
+
     def print_host_info(self):
         signing = colored(f"signing:{self.signing}", host_info_colors[0], attrs=["bold"]) if self.signing else colored(f"signing:{self.signing}", host_info_colors[1], attrs=["bold"])
         smbv1 = colored(f"SMBv1:{self.smbv1}", host_info_colors[2], attrs=["bold"]) if self.smbv1 else colored(f"SMBv1:{self.smbv1}", host_info_colors[3], attrs=["bold"])
@@ -309,10 +313,7 @@ class smb(connection):
         return True
 
     def kerberos_login(self, domain, username, password="", ntlm_hash="", aesKey="", kdcHost="", useCache=False):
-        logging.getLogger("impacket").disabled = True
-        # Re-connect since we logged off
         self.logger.debug(f"KDC set to: {kdcHost}")
-        self.create_conn_obj()
         lmhash = ""
         nthash = ""
 
@@ -370,9 +371,7 @@ class smb(connection):
             if self.args.continue_on_success and self.signing:
                 with contextlib.suppress(Exception):
                     self.conn.logoff()
-
                 self.create_conn_obj()
-
             return True
         except SessionKeyDecryptionError:
             # success for now, since it's a vulnerability - previously was an error
@@ -405,7 +404,6 @@ class smb(connection):
 
     def plaintext_login(self, domain, username, password):
         # Re-connect since we logged off
-        self.create_conn_obj()
         try:
             self.password = password
             self.username = username
@@ -451,14 +449,15 @@ class smb(connection):
                 return False
         except (ConnectionResetError, NetBIOSTimeout, NetBIOSError) as e:
             self.logger.fail(f"Connection Error: {e}")
+            self.create_conn_obj()
             return False
         except BrokenPipeError:
             self.logger.fail("Broken Pipe Error while attempting to login")
+            self.create_conn_obj()
             return False
 
     def hash_login(self, domain, username, ntlm_hash):
         # Re-connect since we logged off
-        self.create_conn_obj()
         lmhash = ""
         nthash = ""
         try:
@@ -515,12 +514,15 @@ class smb(connection):
                 return False
         except (ConnectionResetError, NetBIOSTimeout, NetBIOSError) as e:
             self.logger.fail(f"Connection Error: {e}")
+            self.create_conn_obj()
             return False
         except BrokenPipeError:
             self.logger.fail("Broken Pipe Error while attempting to login")
+            self.create_conn_obj()
             return False
 
     def create_smbv1_conn(self):
+        self.logger.debug(f"Creating SMBv1 connection to {self.host}")
         try:
             self.conn = SMBConnection(
                 self.remoteName,
@@ -538,10 +540,10 @@ class smb(connection):
         except (Exception, NetBIOSTimeout) as e:
             self.logger.info(f"Error creating SMBv1 connection to {self.host}: {e}")
             return False
-
         return True
 
     def create_smbv3_conn(self):
+        self.logger.debug(f"Creating SMBv3 connection to {self.host}")
         try:
             self.conn = SMBConnection(
                 self.remoteName,
@@ -564,8 +566,25 @@ class smb(connection):
             return False
         return True
 
-    def create_conn_obj(self):
-        return bool(self.create_smbv1_conn() or self.create_smbv3_conn())
+    def create_conn_obj(self, no_smbv1=False):
+        """
+        Tries to create a connection object to the target host.
+        On first try, it will try to create a SMBv1 connection.
+        On further tries, it will remember which SMB version is supported and create a connection object accordingly.
+
+        :param no_smbv1: If True, it will not try to create a SMBv1 connection
+        """
+        # Initial negotiation
+        if not no_smbv1 and self.smbv1 is None:
+            self.smbv1 = self.create_smbv1_conn()
+            if self.smbv1:
+                return True
+            else:
+                return self.create_smbv3_conn()
+        elif not no_smbv1 and self.smbv1:
+            return self.create_smbv1_conn()
+        else:
+            return self.create_smbv3_conn()
 
     def check_if_admin(self):
         self.logger.debug(f"Checking if user is admin on {self.host}")
