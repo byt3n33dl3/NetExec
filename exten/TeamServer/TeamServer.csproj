@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="dnlib" Version="3.6.0" />
+      <PackageReference Include="DonutCore" Version="1.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.1" />
+      <PackageReference Include="protobuf-net" Version="3.1.25" />
+      <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+      <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SharpC2.API\SharpC2.API.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\drone.dll" />
+      <EmbeddedResource Include="Resources\drone.dll" />
+      <None Remove="Resources\exe_stager.exe" />
+      <EmbeddedResource Include="Resources\exe_stager.exe" />
+      <None Remove="Resources\svc_stager.exe" />
+      <EmbeddedResource Include="Resources\svc_stager.exe" />
+      <None Remove="Resources\stager.ps1" />
+      <EmbeddedResource Include="Resources\stager.ps1" />
+      <None Remove="server.key" />
+      <None Remove="server.crt" />
+      <None Update="C2Profiles\default.yaml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Data\" />
+    </ItemGroup>
+
+</Project>

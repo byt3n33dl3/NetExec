@@ -1,0 +1,171 @@
+﻿@using SharpC2.API.Requests
+@using Client.Models.Handlers
+
+@inject SharpC2Api Api
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_success">
+            
+            <MudItem Class="my-4">
+                <MudTextField T="string" @bind-Value="_name" Label="Name" Required="true" RequiredError="Name is required" Immediate="@true"/>
+            </MudItem>
+            
+            <MudItem Class="my-4">
+                <MudSelect T="C2Profile" Label="C2 Profile" Variant="Variant.Outlined" @bind-Value="@_selectedProfile">
+                    @foreach (var profile in _profiles)
+                    {
+                        <MudSelectItem T="C2Profile" Value="@profile"/>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem Class="my-4">
+                <MudSelect T="string" Label="Format" Variant="Variant.Outlined" @bind-Value="@SelectedType">
+                    @foreach (var type in _types)
+                    {
+                        <MudSelectItem T="string" Value="@type"/>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem Class="my-4">
+                <MudNumericField @bind-Value="_bindPort" Label="Bind Port" Variant="Variant.Text" Min="1" Max="65535" Immediate="@true"/>
+            </MudItem>
+            
+            <MudItem Class="my-4">
+                <MudTextField T="string" @bind-Value="_connectAddress" Label="Connect Address" Required="true" RequiredError="Connect Address is required" Immediate="@true"/>
+            </MudItem>
+            
+            <MudItem Class="my-4">
+                <MudNumericField @bind-Value="_connectPort" Label="Connect Port" Variant="Variant.Text" Min="1" Max="65535" Immediate="@true"/>
+            </MudItem>
+
+            @if (_selectedType.Equals("HTTPS", StringComparison.OrdinalIgnoreCase))
+            {
+                <MudItem Class="my-4">
+                    <MudGrid>
+                        <MudItem Class="my-4">
+                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                                <ButtonTemplate>
+                                    <MudButton HtmlTag="label"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               StartIcon="@Icons.Filled.CloudUpload"
+                                               for="@context">
+                                        PFX Certificate
+                                    </MudButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+                        </MudItem>
+                        <MudItem Class="my-4">
+                            @if (_pfxCertificate is not null)
+                            {
+                                <MudText Typo="Typo.overline">@($"{_pfxFileName} ({_pfxCertificate.Length} bytes)")</MudText>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            
+                <MudItem Class="my-4">
+                    <MudTextField T="string" @bind-Value="_pfxPassword" Label="PFX Password" InputType="InputType.Password"
+                                  Required="false" Immediate="@true"/>
+                </MudItem>
+            }
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; }
+
+    private MudForm _form;
+    private bool _success;
+
+    private readonly List<C2Profile> _profiles = new();
+    private C2Profile _selectedProfile;
+
+    private readonly string[] _types = { "HTTP", "HTTPS" };
+    private string _selectedType = "HTTP"; // default
+    private string SelectedType
+    {
+        get => _selectedType;
+        set
+        {
+            _selectedType = value;
+            if (_selectedType.Equals("HTTP", StringComparison.OrdinalIgnoreCase))
+            {
+                _bindPort = 80;
+                _connectPort = 80;
+            }
+            else if (_selectedType.Equals("HTTPS", StringComparison.OrdinalIgnoreCase))
+            {
+                _bindPort = 443;
+                _connectPort = 443;
+            }
+        }
+    }
+
+    private string _name;
+    private string _connectAddress;
+    private int _bindPort = 80;
+    private int _connectPort = 80;
+    
+    // https only
+    private string _pfxFileName;
+    private byte[] _pfxCertificate;
+    private string _pfxPassword;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var profiles = await Api.GetC2Profiles();
+        _profiles.AddRange(profiles);
+
+        if (_profiles.Any())
+            _selectedProfile = _profiles.First();
+    }
+
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        using var ms = new MemoryStream();
+        
+        await using var fs = file.OpenReadStream();
+        await fs.CopyToAsync(ms);
+        
+        _pfxCertificate = ms.ToArray();
+        _pfxFileName = file.Name;
+    }
+
+    private async Task Submit()
+    {
+        if (!_success)
+        {
+            await _form.Validate();
+            return;
+        }
+        
+        var request = new HttpHandlerRequest
+        {
+            Name = _name,
+            Profile = _selectedProfile.Name,
+            BindPort = _bindPort,
+            ConnectAddress = _connectAddress,
+            ConnectPort = _connectPort,
+            Secure = _selectedType.Equals("HTTPS", StringComparison.OrdinalIgnoreCase),
+            PfxCertificate = _pfxCertificate,
+            PfxPassword = _pfxPassword
+        };
+
+        await Api.CreateHttpHandler(request);
+        MudDialog.Close(DialogResult.Ok(true));   
+    }
+    
+    private void Cancel()
+        => MudDialog.Cancel();
+}

@@ -1,0 +1,78 @@
+﻿- Alias: connect
+  Description: Connect to a TCP Drone
+  Command: 90
+  Arguments:
+    - Key: target
+      Optional: false
+    - Key: port
+      Optional: false
+
+- Alias: link
+  Description: Connect to an SMB Drone
+  Command: 91
+  Arguments:
+    - Key: target
+      Optional: false
+    - Key: pipename
+      Optional: false
+      
+- Alias: winrm
+  Description: Execute a remote command via WinRM
+  Command: 92
+  Output: 1
+  OpSec: Uses System.Management.Automation to create a PowerShell runspace
+  Arguments:
+    - Key: target
+      Optional: false
+    - Key: command
+      Optional: false
+    - Key: domain
+    - Key: username
+    - Key: password
+
+- Alias: wmi
+  Description: Execute a remote command via WMI
+  Command: 93
+  Output: 1
+  OpSec: Uses Win32_Process (ala process call create)
+  Arguments:
+    - Key: target
+      Optional: false
+    - Key: command
+      Optional: false
+    - Key: domain
+    - Key: username
+    - Key: password
+
+- Alias: psexec
+  Description: Execute a remote command via the Service Control Manager
+  Command: 94
+  Output: 1
+  OpSec: yolo
+  Arguments:
+    - Key: target
+      Optional: false
+    - Key: serviceName
+    - Key: displayName
+    - Key: binPath
+      Optional: false
+
+- Alias: dcom
+  Description: Execute a remote command via DCOM
+  Command: 95
+  Output: 1
+  OpSec: Uses MMC20.Application
+  Arguments:
+    - Key: target
+      Optional: false
+    - Key: method
+      Type: 3
+      Options:
+        - MMC20.Application
+        - ShellWindows
+        - ShellBrowserWindow
+        - ExcelDDE
+      Optional: false
+    - Key: binary
+      Optional: false
+    - Key: args

@@ -1,0 +1,80 @@
+﻿- Alias: pwd
+  Description: Print the current working directory
+  Command: 20
+  Output: 1
+  
+- Alias: cd
+  Description: Change directory
+  Command: 21
+  Arguments:
+    - Key: path
+
+- Alias: cat
+  Description: Read a text file
+  Command: 22
+  Output: 1
+  Arguments:
+    - Key: path
+      Optional: false
+      
+- Alias: rm
+  Description: Remove a file
+  Command: 23
+  Arguments:
+    - Key: path
+      Optional: false
+
+- Alias: mkdir
+  Description: Create a directory
+  Command: 24
+  Arguments:
+    - Key: path
+      Optional: false
+      
+- Alias: rmdir
+  Description: Remove a directory
+  Command: 25
+  Arguments:
+    - Key: path
+      Optional: false
+
+- Alias: ls
+  Description: List a directory
+  Command: 26
+  Output: 2
+  Arguments:
+    - Key: path
+      
+- Alias: ps
+  Description: List running processes
+  Command: 27
+  Output: 3
+  OpSec: Utilises D/Invoke
+
+- Alias: screenshot
+  Description: Take a screenshot
+  Command: 28
+  Output: 4
+      
+- Alias: upload
+  Description: Upload a file
+  Command: 29
+  Arguments:
+    - Key: /path/to/file
+      Optional: false
+      Type: 1
+    - Key: filename
+      Optional: false
+      
+- Alias: whoami
+  Description: Get your current identity
+  Command: 30
+  Output: 1
+  
+- Alias: kill
+  Description: Kill a process
+  Command: 31
+  Output: 1
+  Arguments:
+    - Key: pid
+      Optional: false

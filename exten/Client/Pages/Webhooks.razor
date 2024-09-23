@@ -1,0 +1,88 @@
+﻿@attribute [Authorize]
+@page "/webhooks"
+@using Client.Components.Webhooks
+
+@inject SharpC2Api Api
+@inject SharpC2Hub Hub
+@inject IDialogService Dialogs
+
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+    <MudTable Items="@_webhooks" Hover="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Consumer</MudTh>
+            <MudTh>Event</MudTh>
+            <MudTh>URL</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Consumer">@context.Consumer</MudTd>
+            <MudTd DataLabel="Event">@context.Event</MudTd>
+            <MudTd DataLabel="URL">@context.Url</MudTd>
+            <MudTd>
+                <MudTooltip Text="Delete">
+                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Size="Size.Medium"
+                                   Color="@Color.Error" OnClick="@(async () => await DeleteWebhook(context))"/>
+                </MudTooltip>
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            No Webhooks
+        </NoRecordsContent>
+    </MudTable>
+    
+    <MudTooltip Text="Add Webhook">
+        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" Class="mt-4"
+                OnClick="OpenCreateWebhook"/>
+    </MudTooltip>
+    
+</MudContainer>
+
+@code {
+
+    private bool _loading = true;
+    private readonly List<SharpC2Webhook> _webhooks = new();
+
+    protected override void OnInitialized()
+    {
+        Hub.WebhookCreated += OnWebhookCreated;
+        Hub.WebhookDeleted += OnWebhookDeleted;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var webhooks = await Api.GetWebhooks();
+        
+        _webhooks.AddRange(webhooks);
+        _loading = false;
+    }
+
+    private async Task DeleteWebhook(SharpC2Webhook webhook)
+    {
+        await Api.DeleteWebhook(webhook.Name);
+    }
+    
+    private async Task OpenCreateWebhook()
+    {
+        var options = new DialogOptions { FullWidth = true };
+        await Dialogs.ShowAsync<CreateWebhook>("", options);
+    }
+
+    private async Task OnWebhookCreated(string name)
+    {
+        var webhook = await Api.GetWebhook(name);
+        
+        if (webhook is null)
+            return;
+        
+        _webhooks.Add(webhook);
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    private async Task OnWebhookDeleted(string name)
+    {
+        _webhooks.RemoveAll(h => h.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        await InvokeAsync(StateHasChanged);
+    }
+}

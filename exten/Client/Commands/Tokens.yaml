@@ -1,0 +1,22 @@
+﻿- Alias: make-token
+  Description: Create an access token with plaintext credentials
+  Command: 42
+  Arguments:
+    - Key: domain
+      Optional: false
+    - Key: username
+      Optional: false
+    - Key: password
+      Optional: false
+
+- Alias: steal-token
+  Description: Steal and impersonate the token of a process
+  Command: 43
+  Output: 1
+  Arguments:
+    - Key: pid
+      Optional: false
+
+- Alias: rev2self
+  Description: Drop token impersonation
+  Command: 44

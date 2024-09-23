@@ -1,0 +1,8 @@
+﻿Name: default
+Http:
+  Sleep: 30
+  Jitter: 0
+  GetPaths:
+    - /index.php
+  PostPaths:
+    - /submit.php

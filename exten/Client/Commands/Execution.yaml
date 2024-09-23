@@ -1,0 +1,77 @@
+﻿- Alias: shell
+  Description: Execute a shell command and stream output
+  Command: 58
+  Output: 1
+  OpSec: Spawns "C:\Windows\System32\cmd.exe /c"
+  Arguments:
+    - Key: args
+      Optional: false
+
+- Alias: run
+  Description: Execute a program and stream output
+  Command: 59
+  Output: 1
+  OpSec: Spawns a process
+  Arguments:
+    - Key: program
+      Optional: false
+    - Key: args
+
+- Alias: runas
+  Description: Execute a program with alternate credentials and stream output
+  Command: 60
+  Output: 1
+  OpSec: Spawns a process
+  Arguments:
+    - Key: domain
+      Optional: false
+    - Key: username
+      Optional: false
+    - Key: password
+      Optional: false
+    - Key: program
+      Optional: false
+    - Key: args
+
+- Alias: powershell
+  Description: Execute a PowerShell cmdlet
+  Command: 61
+  Output: 1
+  OpSec: Uses Lee Christensen's Unmanaged PowerShell runner
+  Arguments:
+    - Key: /path/to/ps1
+      Type: 1
+    - Key: cmdlet
+      Optional: false
+    - Key: args
+      
+- Alias: powershell-import
+  Description: Load a PowerShell script into memory
+  Command: 62
+  Arguments:
+    - Key: /path/to/ps1
+      Optional: false
+      Type: 1
+
+- Alias: execute-assembly
+  Description: Load a .NET assembly and call its Entry Point
+  Command: 63
+  Output: 1
+  OpSec: Uses G0ldenGunSec's SharpTransactedLoad
+  Arguments:
+    - Key: /path/to/assembly.exe
+      Optional: false
+      Type: 1
+    - Key: assembly-name
+    - Key: args
+      
+- Alias: execute-pe
+  Description: Load and execute a native binary
+  Command: 57
+  Output: 1
+  OpSec: Uses a C# reflective loader based on Nettitude's RunPE project
+  Arguments:
+    - Key: /path/to/binary.exe
+      Optional: false
+      Type: 1
+    - Key: args

@@ -1,0 +1,24 @@
+﻿{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "192.168.1.229 Passw0rd!",
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:50050",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "192.168.1.229 Passw0rd!",
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:50050",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

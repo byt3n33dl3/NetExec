@@ -1,0 +1,77 @@
+﻿@using Client.Models.Events
+@using SharpC2.API.Requests
+
+@inject SharpC2Api Api
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_success">
+            
+            <MudItem Class="my-4">
+                <MudSelect T="WebhookConsumer" Label="Consumer" Variant="Variant.Outlined" @bind-Value="@_consumer">
+                    <MudSelectItem T="WebhookConsumer" Value="WebhookConsumer.SLACK"/>
+                    <MudSelectItem T="WebhookConsumer" Value="WebhookConsumer.CUSTOM"/>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem Class="my-4">
+                <MudTextField T="string" @bind-Value="_name" Label="Name" Required="true"
+                              RequiredError="Name is required" Immediate="@true"/>
+            </MudItem>
+            
+            <MudItem Class="my-4">
+                <MudSelect T="EventType" Label="Event" Variant="Variant.Outlined" @bind-Value="@_event">
+                    <MudSelectItem T="EventType" Value="EventType.USER_AUTH" />
+                    <MudSelectItem T="EventType" Value="EventType.WEB_LOG" />
+                </MudSelect>
+            </MudItem>
+            
+            <MudItem Class="my-4">
+                <MudTextField T="string" @bind-Value="_url" Label="URL" Required="true"
+                              RequiredError="URL is required" Immediate="@true"/>
+            </MudItem>
+
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; }
+    
+    private MudForm _form;
+    private bool _success;
+    
+    private string _name;
+    private WebhookConsumer _consumer;
+    private EventType _event;
+    private string _url;
+
+    private async Task Submit()
+    {
+        if (!_success)
+        {
+            await _form.Validate();
+            return;
+        }
+
+        var request = new WebhookRequest
+        {
+            Name = _name,
+            Consumer = (int)_consumer,
+            Event = (int)_event,
+            Url = _url
+        };
+
+        await Api.CreateWebhook(request);
+        MudDialog.Close(DialogResult.Ok(true));  
+    }
+
+    private void Cancel()
+        => MudDialog.Cancel();
+}
