@@ -893,8 +893,13 @@ class smb(connection):
 
     def tasklist(self):
         with TSTS.LegacyAPI(self.conn, self.host) as legacy:
-            handle = legacy.hRpcWinStationOpenServer()
-            r = legacy.hRpcWinStationGetAllProcesses(handle)
+            try:
+                handle = legacy.hRpcWinStationOpenServer()            
+                r = legacy.hRpcWinStationGetAllProcesses(handle)
+            except: 
+                # TODO: Issue https://github.com/fortra/impacket/issues/1816
+                self.logger.debug("Exception while calling hRpcWinStationGetAllProcesses")
+                return
             if not len(r):
                 return None
             self.logger.success("Enumerated processes")
